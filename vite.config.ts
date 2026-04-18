@@ -16,7 +16,13 @@ function figmaAssetResolver() {
   }
 }
 
+// Force Vite to open Google Chrome
+process.env.BROWSER = 'chrome';
+
 export default defineConfig({
+  server: {
+    open: true,
+  },
   plugins: [
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
