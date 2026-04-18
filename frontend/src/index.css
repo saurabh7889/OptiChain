@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 8%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 180 100% 50%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 180 100% 50%;
+    --radius: 1.5rem;
+  }
+}
+
+@theme {
+  --color-bento-bg: #0A0A0A;
+  --color-bento-card: #151515;
+  --color-bento-border: #2A2A2A;
+  --color-bento-accent: #00F0FF;
+  --color-bento-muted: #888888;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bento-bg);
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.bento-card {
+  background-color: var(--color-bento-card);
+  border: 1px solid var(--color-bento-border);
+  border-radius: 24px;
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+
+.bento-card:hover {
+  border-color: var(--color-bento-accent);
+}
+
+.data-grid {
+  background-image: radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.glass-panel {
+  background: rgba(21, 21, 21, 0.8);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--color-bento-border);
+}
+
+.section-padding {
+  @apply py-24 px-6 md:px-12 lg:px-24;
+}
+
+.bento-badge {
+  background: #2A2A2A;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--color-bento-accent);
+}
+
+.bento-heading {
+  @apply font-black tracking-tighter leading-none;
+}

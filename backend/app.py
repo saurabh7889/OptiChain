@@ -7,6 +7,7 @@ from flask_cors import CORS
 from config import Config
 from models.database import db, RouteEdge
 from routes.optimize import optimize_bp
+from routes.dashboard import dashboard_bp
 
 # Set up structured application logging
 logging.basicConfig(
@@ -50,6 +51,7 @@ def create_app():
 
     # Register application blueprints
     app.register_blueprint(optimize_bp)
+    app.register_blueprint(dashboard_bp)
 
     @app.route('/health', methods=['GET'])
     def health_check():
