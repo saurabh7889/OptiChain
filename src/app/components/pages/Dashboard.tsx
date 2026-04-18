@@ -1,258 +1,291 @@
-import { Package, TruckIcon, AlertTriangle, Warehouse, Activity, TrendingUp, MapPin, Zap } from 'lucide-react';
+import { Package, TruckIcon, AlertTriangle, Warehouse, Activity, Zap, RefreshCw, Search, Box } from 'lucide-react';
 import { KPICard } from '../shared/KPICard';
 import { AlertCard } from '../shared/AlertCard';
-import { StatusBadge } from '../shared/StatusBadge';
+import { useDashboard } from '../../hooks/useDashboard';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import { useEffect } from 'react';
+
+// Fix for Leaflet marker icons in React
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
+
+function MapView({ center, zoom }: { center: [number, number], zoom: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  return null;
+}
 
 export function Dashboard() {
+  const { data, loading, dismissAlert, refreshData } = useDashboard();
+  const navigate = useNavigate();
+
+  if (loading || !data) {
+    return (
+      <div className="p-6 flex items-center justify-center h-full bg-gray-50/50">
+        <div className="flex flex-col items-center gap-4">
+          <RefreshCw className="w-10 h-10 text-indigo-600 animate-spin" />
+          <p className="text-gray-600 font-medium animate-pulse">Initializing Control Tower...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Control Tower</h1>
-        <p className="text-gray-600 mt-1">Real-time logistics and inventory oversight</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Control Tower</h1>
+          <p className="text-gray-500 mt-1 font-medium">Real-time supply chain monitoring & analytics</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative hidden md:block">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input 
+              type="text" 
+              placeholder="Quick search..."
+              className="pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none w-64 bg-white/50 backdrop-blur-sm transition-all"
+            />
+          </div>
+          <button 
+            onClick={() => {
+              refreshData();
+              toast.success('System synchronization forced');
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 active:scale-95"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Sync System
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <KPICard
           title="Total Shipments"
-          value="1,247"
-          change={12.5}
+          value={data.kpis.totalShipments}
+          change={0}
           icon={Package}
-          trend="up"
           status="neutral"
         />
         <KPICard
           title="Delayed Shipments"
-          value="23"
-          change={-8.3}
+          value={data.kpis.delayedShipments}
+          change={0}
           icon={AlertTriangle}
-          trend="down"
-          status="danger"
+          status={data.kpis.delayedShipments > 0 ? 'danger' : 'neutral'}
         />
         <KPICard
           title="Inventory Health"
-          value="94%"
-          change={2.1}
+          value={data.kpis.inventoryHealth === 0 ? '0%' : `${data.kpis.inventoryHealth}%`}
+          change={0}
           icon={Warehouse}
-          trend="up"
-          status="success"
+          status="neutral"
         />
         <KPICard
           title="Active Vehicles"
-          value="156"
-          change={5.2}
+          value={data.kpis.activeVehicles}
+          change={0}
           icon={TruckIcon}
-          trend="up"
           status="neutral"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Real-time Tracking Map */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Live Tracking</h2>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-gray-600">Live</span>
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col min-h-[500px]">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                <TruckIcon className="w-5 h-5 text-indigo-600" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Live Global Tracking</h2>
+                <p className="text-xs text-gray-500 font-medium">Monitoring active fleet across all regions</p>
+              </div>
+            </div>
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
+              data.kpis.activeVehicles > 0 ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-400'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${data.kpis.activeVehicles > 0 ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`}></div>
+              {data.kpis.activeVehicles > 0 ? 'LIVE UPDATES' : 'STATIONARY'}
             </div>
           </div>
 
-          {/* Map Placeholder */}
-          <div className="relative bg-gray-50 rounded-lg h-80 border border-gray-200 overflow-hidden">
-            {/* Simulated Map Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50"></div>
-
-            {/* Simulated Routes and Vehicles */}
-            <svg className="absolute inset-0 w-full h-full">
-              <path
-                d="M 50 200 Q 150 100 250 180 T 450 160"
-                stroke="#4f46e5"
-                strokeWidth="3"
-                fill="none"
-                strokeDasharray="5,5"
-                opacity="0.4"
+          {/* Leaflet Map Integration */}
+          <div className="relative flex-1 rounded-xl border border-gray-100 overflow-hidden shadow-inner z-0 min-h-[400px]">
+             <MapContainer 
+              center={[20, 0]} 
+              zoom={2} 
+              scrollWheelZoom={true}
+              style={{ height: '100%', width: '100%' }}
+              className="z-0"
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              <path
-                d="M 100 150 Q 200 80 350 140 T 500 120"
-                stroke="#10b981"
-                strokeWidth="3"
-                fill="none"
-                opacity="0.6"
-              />
-            </svg>
+              <MapView center={[20, 0]} zoom={2} />
+              
+              {data.vehicles.map((vehicle) => (
+                <Marker key={vehicle.id} position={[vehicle.lat, vehicle.lng]}>
+                  <Popup>
+                    <div className="p-1">
+                      <p className="font-bold text-indigo-600">{vehicle.label}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Status: {vehicle.status.toUpperCase()}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
 
-            {/* Vehicle Markers */}
-            <div className="absolute top-1/4 left-1/4 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="relative">
-                <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                  <TruckIcon className="w-4 h-4 text-white" />
-                </div>
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-white px-2 py-1 rounded shadow-md text-xs">
-                  SH-4521
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute top-1/2 right-1/3 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="relative">
-                <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                  <TruckIcon className="w-4 h-4 text-white" />
-                </div>
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-white px-2 py-1 rounded shadow-md text-xs">
-                  SH-4522
+            {/* Empty State Overlay if no vehicles */}
+            {data.vehicles.length === 0 && (
+              <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] pointer-events-none flex items-center justify-center z-[500]">
+                <div className="bg-white/95 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-white/50 text-center max-w-sm mx-4 transform transition-all">
+                  <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100">
+                    <Box className="w-8 h-8 text-gray-300" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900">Waiting for Fleet Data</h3>
+                  <p className="text-sm text-gray-500 mt-2 leading-relaxed">
+                    Once trucks are registered with destinations in the **Shipments** or **Vehicles** sections, they will appear here in real-time.
+                  </p>
                 </div>
               </div>
-            </div>
-
-            <div className="absolute bottom-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-              <div className="relative">
-                <div className="w-8 h-8 bg-yellow-600 rounded-full flex items-center justify-center shadow-lg">
-                  <TruckIcon className="w-4 h-4 text-white" />
-                </div>
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-white px-2 py-1 rounded shadow-md text-xs">
-                  SH-4523 (Delayed)
-                </div>
-              </div>
-            </div>
-
-            {/* Legend */}
-            <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-md p-3 space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-600 rounded-full"></div>
-                <span className="text-xs text-gray-700">On Time</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-yellow-600 rounded-full"></div>
-                <span className="text-xs text-gray-700">Delayed</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-indigo-600 rounded-full"></div>
-                <span className="text-xs text-gray-700">In Transit</span>
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* Active Shipments Summary */}
-          <div className="mt-4 grid grid-cols-3 gap-4">
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-semibold text-gray-900">89</p>
-              <p className="text-sm text-gray-600">In Transit</p>
-            </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-semibold text-gray-900">34</p>
-              <p className="text-sm text-gray-600">Arriving Today</p>
-            </div>
-            <div className="text-center p-3 bg-gray-50 rounded-lg">
-              <p className="text-2xl font-semibold text-gray-900">12</p>
-              <p className="text-sm text-gray-600">At Risk</p>
-            </div>
+          {/* Map Controls / Summary */}
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: 'In Transit', value: 0, color: 'indigo' },
+              { label: 'Completed', value: 0, color: 'green' },
+              { label: 'Delayed', value: 0, color: 'red' },
+              { label: 'Off-Route', value: 0, color: 'yellow' },
+            ].map((stat, idx) => (
+              <div key={idx} className="bg-gray-50/50 p-4 rounded-xl border border-gray-100/50 hover:bg-gray-50 transition-colors">
+                <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-1">{stat.label}</p>
+                <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Alerts Panel */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Critical Alerts</h2>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            <AlertCard
-              type="critical"
-              title="Shipment Delay"
-              message="SH-4523 delayed by 3 hours due to traffic"
-              timestamp="5 min ago"
-            />
-            <AlertCard
-              type="warning"
-              title="Low Stock Alert"
-              message="Product SKU-4521 below threshold"
-              timestamp="15 min ago"
-            />
-            <AlertCard
-              type="critical"
-              title="Vehicle Issue"
-              message="Truck VH-892 requires maintenance"
-              timestamp="1 hour ago"
-            />
-            <AlertCard
-              type="info"
-              title="Route Optimized"
-              message="New route saved 45 minutes for SH-4524"
-              timestamp="2 hours ago"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* AI Insights Section */}
-      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200 p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <Zap className="w-5 h-5 text-white" />
-          </div>
-          <h2 className="text-lg font-semibold text-gray-900">AI-Powered Insights</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg p-4 border border-indigo-100">
-            <div className="flex items-start gap-3">
-              <TrendingUp className="w-5 h-5 text-indigo-600 mt-1" />
-              <div>
-                <p className="font-medium text-gray-900 mb-1">Route Inefficiency Detected</p>
-                <p className="text-sm text-gray-600">3 shipments can be optimized to save 2.5 hours</p>
-                <button className="text-sm text-indigo-600 font-medium mt-2 hover:text-indigo-700">
-                  Optimize Now →
-                </button>
-              </div>
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm flex flex-col">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Critical Alerts</h2>
+            <div className="px-2.5 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold">
+              {data.alerts.length} NEW
             </div>
           </div>
-          <div className="bg-white rounded-lg p-4 border border-indigo-100">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-yellow-600 mt-1" />
-              <div>
-                <p className="font-medium text-gray-900 mb-1">Stock Prediction</p>
-                <p className="text-sm text-gray-600">5 items will run out in 2 days based on demand</p>
-                <button className="text-sm text-indigo-600 font-medium mt-2 hover:text-indigo-700">
-                  View Details →
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-lg p-4 border border-indigo-100">
-            <div className="flex items-start gap-3">
-              <Activity className="w-5 h-5 text-green-600 mt-1" />
-              <div>
-                <p className="font-medium text-gray-900 mb-1">Performance Trend</p>
-                <p className="text-sm text-gray-600">Delivery success rate improved by 8% this week</p>
-                <button className="text-sm text-indigo-600 font-medium mt-2 hover:text-indigo-700">
-                  See Analytics →
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
-        <div className="space-y-4">
-          {[
-            { action: 'Shipment Created', item: 'SH-4530', time: '2 minutes ago', status: 'info' },
-            { action: 'Delivery Completed', item: 'SH-4501', time: '15 minutes ago', status: 'success' },
-            { action: 'Inventory Updated', item: 'SKU-8821', time: '32 minutes ago', status: 'info' },
-            { action: 'Route Optimized', item: 'Route-A45', time: '1 hour ago', status: 'success' },
-            { action: 'Order Placed', item: 'ORD-7723', time: '1 hour ago', status: 'info' },
-          ].map((activity, index) => (
-            <div key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-              <div className="flex items-center gap-3">
-                <div className={`w-2 h-2 rounded-full ${activity.status === 'success' ? 'bg-green-500' : 'bg-blue-500'}`}></div>
-                <div>
-                  <p className="font-medium text-gray-900">{activity.action}</p>
-                  <p className="text-sm text-gray-600">{activity.item}</p>
+          
+          <div className="flex-1 space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+            {data.alerts.length > 0 ? (
+              data.alerts.map((alert) => (
+                <div key={alert.id} className="relative group">
+                  <AlertCard
+                    type={alert.type}
+                    title={alert.title}
+                    message={alert.message}
+                    timestamp={alert.timestamp}
+                  />
+                  <button 
+                    onClick={() => dismissAlert(alert.id)}
+                    className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 p-1.5 bg-white rounded-lg shadow-sm border border-gray-100 text-gray-400 hover:text-red-600 transition-all text-[10px] font-bold"
+                  >
+                    DISMISS
+                  </button>
                 </div>
+              ))
+            ) : (
+              <div className="h-full flex flex-col items-center justify-center text-center py-12">
+                <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 border border-gray-100">
+                  <Zap className="w-8 h-8 text-gray-200" />
+                </div>
+                <h3 className="text-gray-900 font-bold">System Status: Clear</h3>
+                <p className="text-sm text-gray-400 mt-2 px-6">
+                  Great! No critical issues or delays detected at this moment.
+                </p>
               </div>
-              <span className="text-sm text-gray-500">{activity.time}</span>
+            )}
+          </div>
+          
+          <button 
+            disabled={data.alerts.length === 0}
+            className="mt-6 w-full py-3 px-4 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm font-bold text-gray-600 transition-all border border-gray-100"
+          >
+            Clear All Notifications
+          </button>
+        </div>
+      </div>
+
+      {/* Zero State Activity & Insights */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+           <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-gray-900">Recent System Activity</h2>
+              <Activity className="w-5 h-5 text-gray-300" />
+           </div>
+           {data.activities.length > 0 ? (
+             <div className="space-y-4">
+                {data.activities.map((activity) => (
+                  <div key={activity.id} className="flex items-center justify-between py-4 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 px-3 -mx-3 rounded-xl transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-2.5 h-2.5 rounded-full shadow-sm ${activity.status === 'success' ? 'bg-green-500' : 'bg-indigo-500'}`}></div>
+                      <div>
+                        <p className="font-bold text-gray-900 leading-none">{activity.action}</p>
+                        <p className="text-xs text-gray-500 mt-1.5 font-medium">{activity.item}</p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{activity.time}</span>
+                  </div>
+                ))}
+             </div>
+           ) : (
+             <div className="py-12 text-center">
+                <p className="text-gray-400 text-sm font-medium italic">No recorded activity yet. Actions will sync as they occur.</p>
+             </div>
+           )}
+        </div>
+
+        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-8 shadow-xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-white/20 transition-all duration-700"></div>
+          <div className="relative z-10">
+            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6">
+              <Zap className="w-6 h-6 text-white" />
             </div>
-          ))}
+            <h2 className="text-2xl font-bold text-white mb-2">Smart Insights Engine</h2>
+            <p className="text-indigo-100/80 mb-6 max-w-md font-medium">
+              Our AI is waiting for movement. Once shipments and routes are active, we'll provide optimization recommendations here.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <button 
+                onClick={() => navigate('/analytics')}
+                className="px-6 py-2.5 bg-white text-indigo-600 rounded-xl text-sm font-bold hover:bg-indigo-50 transition-all active:scale-95"
+              >
+                Explore Analytics
+              </button>
+              <button className="px-6 py-2.5 bg-indigo-500/30 text-white rounded-xl text-sm font-bold hover:bg-indigo-500/50 transition-all backdrop-blur-sm active:scale-95">
+                Enable Predictions
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

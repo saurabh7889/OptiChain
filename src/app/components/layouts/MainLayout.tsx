@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router';
+import { Toaster } from 'sonner';
 import {
   LayoutDashboard,
   Package,
@@ -32,6 +33,7 @@ export function MainLayout() {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      <Toaster position="top-right" richColors />
       {/* Sidebar */}
       <aside
         className={`${
