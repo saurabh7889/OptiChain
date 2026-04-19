@@ -3,6 +3,34 @@
 @import "./theme.css";
 @import "leaflet/dist/leaflet.css";
 
+/* ===== GLOBAL TEXT CLARITY ===== */
+/* Ensure all input values are dark and readable */
+input,
+textarea,
+select {
+  color: #1f2937 !important;        /* gray-800 */
+  font-weight: 500;
+}
+
+/* Make placeholders clearly visible but distinguishable */
+input::placeholder,
+textarea::placeholder {
+  color: #9ca3af !important;        /* gray-400 — visible but subtle */
+  opacity: 1 !important;
+  font-weight: 400;
+}
+
+/* Labels and headings always dark */
+label {
+  color: #374151;                   /* gray-700 */
+}
+
+/* Select dropdown text */
+select option {
+  color: #1f2937;
+  background: #ffffff;
+}
+
 /* Custom Scrollbar for a premium feel */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
@@ -27,3 +55,4 @@
   height: 100%;
   border-radius: 0.75rem;
 }
+
