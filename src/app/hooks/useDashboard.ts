@@ -8,7 +8,8 @@ export function useDashboard() {
   const fetchData = useCallback(async () => {
     try {
       // In a real production app, this URL would come from an environment variable
-      const response = await fetch('http://localhost:5000/api/dashboard');
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/dashboard`);
       if (!response.ok) throw new Error('Backend synchronization failed');
       const jsonData = await response.json();
       setData(jsonData);

@@ -73,9 +73,11 @@ def create_app():
 app_instance = create_app()
 
 if __name__ == '__main__':
-    # Debug runner
+    import os
+    # Support for Render/Vercel/Heroku PORT environment variable
+    port = int(os.environ.get('PORT', 5000))
     app_instance.run(
         host='0.0.0.0', 
-        port=5000, 
+        port=port, 
         debug=app_instance.config.get('DEBUG', False)
     )
