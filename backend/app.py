@@ -2,6 +2,7 @@
 Main Application Factory for the OptiChain Backend.
 """
 import logging
+import os
 from flask import Flask
 from flask_cors import CORS
 from config import Config
@@ -69,15 +70,8 @@ def create_app():
 
     return app
 
-# WSGI entry point
-app_instance = create_app()
+# WSGI entry point — named "app" for gunicorn compatibility (gunicorn app:app)
+app = create_app()
 
-if __name__ == '__main__':
-    import os
-    # Support for Render/Vercel/Heroku PORT environment variable
-    port = int(os.environ.get('PORT', 5000))
-    app_instance.run(
-        host='0.0.0.0', 
-        port=port, 
-        debug=app_instance.config.get('DEBUG', False)
-    )
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
