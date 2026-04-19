@@ -137,8 +137,8 @@ export function Dashboard() {
               className="z-0"
             >
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
               />
               <MapView center={[20, 0]} zoom={2} />
               
@@ -263,30 +263,6 @@ export function Dashboard() {
                 <p className="text-gray-400 text-sm font-medium italic">No recorded activity yet. Actions will sync as they occur.</p>
              </div>
            )}
-        </div>
-
-        <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-8 shadow-xl relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 group-hover:bg-white/20 transition-all duration-700"></div>
-          <div className="relative z-10">
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-6">
-              <Zap className="w-6 h-6 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-white mb-2">Smart Insights Engine</h2>
-            <p className="text-indigo-100/80 mb-6 max-w-md font-medium">
-              Our AI is waiting for movement. Once shipments and routes are active, we'll provide optimization recommendations here.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <button 
-                onClick={() => navigate('/analytics')}
-                className="px-6 py-2.5 bg-white text-indigo-600 rounded-xl text-sm font-bold hover:bg-indigo-50 transition-all active:scale-95"
-              >
-                Explore Analytics
-              </button>
-              <button className="px-6 py-2.5 bg-indigo-500/30 text-white rounded-xl text-sm font-bold hover:bg-indigo-500/50 transition-all backdrop-blur-sm active:scale-95">
-                Enable Predictions
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

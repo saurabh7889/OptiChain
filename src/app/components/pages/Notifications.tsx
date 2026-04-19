@@ -1,90 +1,22 @@
-import { Bell, AlertTriangle, CheckCircle, Info, Package, TruckIcon, Warehouse, Sparkles } from 'lucide-react';
+import { Bell, AlertTriangle, CheckCircle, Info, Package, TruckIcon, Warehouse, Sparkles, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-const notifications = [
-  {
-    id: 1,
-    type: 'critical',
-    icon: AlertTriangle,
-    title: 'Shipment Delayed',
-    message: 'SH-4523 delayed by 3 hours due to traffic congestion on I-95',
-    timestamp: '5 minutes ago',
-    read: false,
-  },
-  {
-    id: 2,
-    type: 'warning',
-    icon: Warehouse,
-    title: 'Low Stock Alert',
-    message: 'Product SKU-4521 (Wireless Mouse Pro) is below reorder point in Warehouse B',
-    timestamp: '15 minutes ago',
-    read: false,
-  },
-  {
-    id: 3,
-    type: 'critical',
-    icon: TruckIcon,
-    title: 'Vehicle Maintenance Required',
-    message: 'Truck VH-892 requires immediate maintenance - brake system warning',
-    timestamp: '1 hour ago',
-    read: false,
-  },
-  {
-    id: 4,
-    type: 'info',
-    icon: Package,
-    title: 'Route Optimized',
-    message: 'New route for SH-4524 saved 45 minutes and reduced fuel consumption by 12%',
-    timestamp: '2 hours ago',
-    read: true,
-  },
-  {
-    id: 5,
-    type: 'success',
-    icon: CheckCircle,
-    title: 'Delivery Completed',
-    message: 'Shipment SH-4501 successfully delivered to Boston, MA',
-    timestamp: '3 hours ago',
-    read: true,
-  },
-  {
-    id: 6,
-    type: 'info',
-    icon: Package,
-    title: 'New Order Received',
-    message: 'Order ORD-7730 received from TechCorp Inc. - 12 items valued at $4,580',
-    timestamp: '4 hours ago',
-    read: true,
-  },
-  {
-    id: 7,
-    type: 'warning',
-    icon: Warehouse,
-    title: 'Inventory Aging Alert',
-    message: '4 items in Warehouse A have not moved in 30 days',
-    timestamp: '5 hours ago',
-    read: true,
-  },
-  {
-    id: 8,
-    type: 'success',
-    icon: CheckCircle,
-    title: 'Maintenance Completed',
-    message: 'Vehicle VH-889 has completed scheduled maintenance and is ready for service',
-    timestamp: '6 hours ago',
-    read: true,
-  },
-];
+import { useNotifications } from '../../hooks/useNotifications';
 
 export function Notifications() {
+  const { notifications, markAllAsReadAndClear, markAsRead, deleteNotification } = useNotifications();
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleAISummary = () => {
+    if (unreadCount === 0) {
+      toast.info("No unread notifications to summarize.");
+      return;
+    }
+    
     toast.promise(
       new Promise((resolve) => setTimeout(resolve, 1500)),
       {
-        loading: 'AI is analyzing your notifications...',
-        success: 'AI Summary: You have 1 critical shipment delay, a low stock warning for SKU-4521, and an immediate brake system check needed for Truck VH-892.',
+        loading: 'Vizard AI is analyzing your notifications...',
+        success: `Vizard AI Summary: You have ${unreadCount} unread items. Please check critical delays and maintenance warnings immediately to prevent bottlenecks.`,
         error: 'Failed to generate AI summary',
       }
     );
@@ -122,26 +54,33 @@ export function Notifications() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Notifications</h1>
           <p className="text-gray-600 mt-1">
             {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
           <button 
             onClick={handleAISummary}
             className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium flex items-center gap-2 border border-purple-200"
           >
             <Sparkles className="w-4 h-4" />
-            AI Summary
+            Vizard AI Summary
           </button>
-          <button className="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-            Mark All as Read
+          <button 
+            onClick={() => {
+              markAllAsReadAndClear();
+              toast.success("All notifications cleared!");
+            }}
+            className="px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium flex items-center gap-2"
+          >
+            <Trash2 className="w-4 h-4" />
+            Clear All
           </button>
           <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
-            Notification Settings
+            Settings
           </button>
         </div>
       </div>
@@ -174,7 +113,18 @@ export function Notifications() {
       {/* Notifications List */}
       <div className="space-y-3">
         {notifications.map((notification) => {
-          const Icon = notification.icon;
+          const getIconComponent = (iconType: string) => {
+            switch (iconType) {
+              case 'alert': return AlertTriangle;
+              case 'warehouse': return Warehouse;
+              case 'truck': return TruckIcon;
+              case 'package': return Package;
+              case 'check': return CheckCircle;
+              case 'info': return Info;
+              default: return Bell;
+            }
+          };
+          const Icon = getIconComponent(notification.iconType);
           const styles = getNotificationStyles(notification.type);
 
           return (
@@ -212,12 +162,18 @@ export function Notifications() {
                       <span className="text-xs text-gray-500">{notification.timestamp}</span>
                       <div className="flex items-center gap-2">
                         {!notification.read && (
-                          <button className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                          <button 
+                            onClick={() => markAsRead(notification.id)}
+                            className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                          >
                             Mark as Read
                           </button>
                         )}
-                        <button className="text-xs text-gray-600 hover:text-gray-700 font-medium">
-                          View Details
+                        <button 
+                          onClick={() => deleteNotification(notification.id)}
+                          className="text-xs text-red-600 hover:text-red-700 font-medium ml-2"
+                        >
+                          Delete
                         </button>
                       </div>
                     </div>

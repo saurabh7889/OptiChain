@@ -1,52 +1,50 @@
 import { TrendingUp, TrendingDown, BarChart3, DollarSign, Fuel, Package, Target } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const deliveryData = [
-  { month: 'Oct', success: 92, delayed: 8 },
-  { month: 'Nov', success: 89, delayed: 11 },
-  { month: 'Dec', success: 94, delayed: 6 },
-  { month: 'Jan', success: 91, delayed: 9 },
-  { month: 'Feb', success: 88, delayed: 12 },
-  { month: 'Mar', success: 95, delayed: 5 },
-  { month: 'Apr', success: 97, delayed: 3 },
-];
-
-const costData = [
-  { month: 'Oct', cost: 245 },
-  { month: 'Nov', cost: 268 },
-  { month: 'Dec', cost: 234 },
-  { month: 'Jan', cost: 289 },
-  { month: 'Feb', cost: 256 },
-  { month: 'Mar', cost: 223 },
-  { month: 'Apr', cost: 198 },
-];
-
-const fuelData = [
-  { month: 'Oct', usage: 3420 },
-  { month: 'Nov', usage: 3680 },
-  { month: 'Dec', usage: 3250 },
-  { month: 'Jan', usage: 3890 },
-  { month: 'Feb', usage: 3520 },
-  { month: 'Mar', usage: 3180 },
-  { month: 'Apr', usage: 2940 },
-];
-
-const shipmentDistribution = [
-  { name: 'Delivered', value: 1247 },
-  { name: 'In Transit', value: 89 },
-  { name: 'Delayed', value: 23 },
-  { name: 'Pending', value: 45 },
-];
+import { useAnalytics } from '../../hooks/useAnalytics';
+import { toast } from 'sonner';
+import { Sparkles, Database } from 'lucide-react';
 
 const COLORS = ['#10b981', '#4f46e5', '#ef4444', '#f59e0b'];
 
 export function Analytics() {
+  const { data, loadMockData, clearData } = useAnalytics();
+
+  const handleAISummary = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Vizard AI is generating analytics summary...',
+        success: 'Vizard AI Summary: Delivery success is trending upward at 97%. Cost per shipment has decreased by 11%. No immediate actions required.',
+        error: 'Failed to generate AI summary',
+      }
+    );
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Analytics & Insights</h1>
-        <p className="text-gray-600 mt-1">Track performance, costs, and predictive trends</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-900">Analytics & Insights</h1>
+          <p className="text-gray-600 mt-1">Track performance, costs, and predictive trends</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleAISummary}
+            className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium flex items-center gap-2 border border-purple-200"
+          >
+            <Sparkles className="w-4 h-4" />
+            Vizard AI Summary
+          </button>
+          <button 
+            onClick={data.deliveryData.length === 0 ? loadMockData : clearData}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2"
+          >
+            <Database className="w-4 h-4" />
+            {data.deliveryData.length === 0 ? 'Load Mock Data' : 'Clear Data'}
+          </button>
+        </div>
       </div>
 
       {/* Key Metrics */}
@@ -111,7 +109,7 @@ export function Analytics() {
             </select>
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={deliveryData}>
+            <LineChart data={data.deliveryData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="month" stroke="#9ca3af" style={{ fontSize: '12px' }} />
               <YAxis stroke="#9ca3af" style={{ fontSize: '12px' }} />
@@ -153,7 +151,7 @@ export function Analytics() {
             </select>
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={costData}>
+            <BarChart data={data.costData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="month" stroke="#9ca3af" style={{ fontSize: '12px' }} />
               <YAxis stroke="#9ca3af" style={{ fontSize: '12px' }} />
@@ -180,7 +178,7 @@ export function Analytics() {
             </select>
           </div>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={fuelData}>
+            <LineChart data={data.fuelData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
               <XAxis dataKey="month" stroke="#9ca3af" style={{ fontSize: '12px' }} />
               <YAxis stroke="#9ca3af" style={{ fontSize: '12px' }} />
@@ -210,7 +208,7 @@ export function Analytics() {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={shipmentDistribution}
+                data={data.shipmentDistribution}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
@@ -219,7 +217,7 @@ export function Analytics() {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {shipmentDistribution.map((entry, index) => (
+                {data.shipmentDistribution.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
@@ -233,7 +231,7 @@ export function Analytics() {
             </PieChart>
           </ResponsiveContainer>
           <div className="grid grid-cols-2 gap-3 mt-4">
-            {shipmentDistribution.map((item, index) => (
+            {data.shipmentDistribution.map((item, index) => (
               <div key={index} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full"

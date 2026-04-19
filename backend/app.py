@@ -8,6 +8,9 @@ from config import Config
 from models.database import db, RouteEdge
 from routes.optimize import optimize_bp
 from routes.dashboard import dashboard_bp
+from routes.vehicles import vehicles_bp
+from routes.orders import orders_bp
+from routes.notifications import notifications_bp
 
 # Set up structured application logging
 logging.basicConfig(
@@ -29,7 +32,7 @@ def create_app():
     db.init_app(app)
     
     with app.app_context():
-        # Create MySQL tables if they operate in bounded contexts
+        # Create all SQL tables if they don't exist
         db.create_all()
         
         # Seed initial graph data if database is empty
@@ -52,6 +55,9 @@ def create_app():
     # Register application blueprints
     app.register_blueprint(optimize_bp)
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(vehicles_bp)
+    app.register_blueprint(orders_bp)
+    app.register_blueprint(notifications_bp)
 
     @app.route('/health', methods=['GET'])
     def health_check():

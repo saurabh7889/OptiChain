@@ -1,94 +1,94 @@
-import { TruckIcon, Wrench, AlertTriangle, CheckCircle, Activity, Fuel } from 'lucide-react';
+import { TruckIcon, Wrench, AlertTriangle, CheckCircle, Activity, Fuel, X } from 'lucide-react';
 import { StatusBadge } from '../shared/StatusBadge';
 import { ProgressBar } from '../shared/ProgressBar';
-
-const vehicles = [
-  {
-    id: 'VH-892',
-    model: 'Freightliner Cascadia',
-    driver: 'John Smith',
-    status: 'Active',
-    currentShipment: 'SH-4530',
-    health: 92,
-    mileage: '45,230 km',
-    lastMaintenance: '5 days ago',
-    nextMaintenance: '15 days',
-    fuelLevel: 78,
-    location: 'En route to Boston',
-  },
-  {
-    id: 'VH-891',
-    model: 'Volvo VNL',
-    driver: 'Sarah Johnson',
-    status: 'Active',
-    currentShipment: 'SH-4529',
-    health: 68,
-    mileage: '78,450 km',
-    lastMaintenance: '18 days ago',
-    nextMaintenance: '2 days',
-    fuelLevel: 45,
-    location: 'En route to San Francisco',
-  },
-  {
-    id: 'VH-890',
-    model: 'Kenworth T680',
-    driver: 'Mike Davis',
-    status: 'Idle',
-    currentShipment: null,
-    health: 95,
-    mileage: '32,100 km',
-    lastMaintenance: '2 days ago',
-    nextMaintenance: '28 days',
-    fuelLevel: 92,
-    location: 'Detroit Depot',
-  },
-  {
-    id: 'VH-889',
-    model: 'Peterbilt 579',
-    driver: 'Emily Brown',
-    status: 'Maintenance',
-    currentShipment: null,
-    health: 45,
-    mileage: '92,340 km',
-    lastMaintenance: 'In progress',
-    nextMaintenance: 'N/A',
-    fuelLevel: 35,
-    location: 'Houston Service Center',
-  },
-  {
-    id: 'VH-888',
-    model: 'Freightliner Cascadia',
-    driver: 'David Wilson',
-    status: 'Active',
-    currentShipment: 'SH-4527',
-    health: 88,
-    mileage: '56,890 km',
-    lastMaintenance: '10 days ago',
-    nextMaintenance: '20 days',
-    fuelLevel: 64,
-    location: 'En route to Dallas',
-  },
-];
+import { useState } from 'react';
+import { useVehicles } from '../../hooks/useVehicles';
+import { toast } from 'sonner';
+import { Sparkles, Trash2 } from 'lucide-react';
 
 const fleetStats = [
-  { label: 'Total Fleet', value: '156', icon: TruckIcon, color: 'bg-indigo-50 text-indigo-600' },
-  { label: 'Active', value: '89', icon: Activity, color: 'bg-green-50 text-green-600' },
-  { label: 'Idle', value: '54', icon: CheckCircle, color: 'bg-gray-50 text-gray-600' },
-  { label: 'Maintenance', value: '13', icon: Wrench, color: 'bg-red-50 text-red-600' },
+  { label: 'Total Fleet', value: (count: number) => count, icon: TruckIcon, color: 'bg-indigo-50 text-indigo-600' },
+  { label: 'Active', value: (v: any[]) => v.filter(x => x.status === 'Active').length, icon: Activity, color: 'bg-green-50 text-green-600' },
+  { label: 'Idle', value: (v: any[]) => v.filter(x => x.status === 'Idle').length, icon: CheckCircle, color: 'bg-gray-50 text-gray-600' },
+  { label: 'Maintenance', value: (v: any[]) => v.filter(x => x.status === 'Maintenance').length, icon: Wrench, color: 'bg-red-50 text-red-600' },
 ];
 
 export function Vehicles() {
+  const { vehicles, addVehicle, deleteVehicle } = useVehicles();
+  const [showModal, setShowModal] = useState(false);
+  const [form, setForm] = useState({
+    model: '',
+    driver: '',
+    status: 'Idle' as 'Active' | 'Idle' | 'Maintenance',
+    location: '',
+    mileage: '0',
+    fuelLevel: 100,
+    health: 100,
+  });
+
+  const handleFormChange = (field: string, value: any) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmitVehicle = () => {
+    if (!form.model.trim() || !form.driver.trim() || !form.location.trim()) {
+      toast.error('Please fill in all required fields.');
+      return;
+    }
+    addVehicle({
+      model: form.model,
+      driver: form.driver,
+      status: form.status,
+      currentShipment: null,
+      health: form.health,
+      mileage: `${form.mileage} km`,
+      lastMaintenance: 'Today',
+      nextMaintenance: '30 days',
+      fuelLevel: form.fuelLevel,
+      location: form.location,
+    });
+    setShowModal(false);
+    setForm({ model: '', driver: '', status: 'Idle', location: '', mileage: '0', fuelLevel: 100, health: 100 });
+    toast.success('Vehicle added successfully!');
+  };
+
+  const handleAISummary = () => {
+    const active = vehicles.filter(v => v.status === 'Active').length;
+    const maintenance = vehicles.filter(v => v.status === 'Maintenance').length;
+    const lowHealth = vehicles.filter(v => v.health < 70).length;
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Vizard AI is analyzing your fleet...',
+        success: `Fleet Report: ${vehicles.length} total vehicles — ${active} active, ${maintenance} in maintenance. ${lowHealth > 0 ? `⚠️ ${lowHealth} vehicle(s) need attention (health < 70%).` : '✅ All vehicles are in good health.'}`,
+        error: 'Failed to generate AI summary',
+      }
+    );
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Fleet Management</h1>
           <p className="text-gray-600 mt-1">Monitor vehicle health and maintenance schedules</p>
         </div>
-        <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium">
-          + Add Vehicle
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleAISummary}
+            className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium flex items-center gap-2 border border-purple-200"
+          >
+            <Sparkles className="w-4 h-4" />
+            Vizard AI Summary
+          </button>
+          <button 
+            onClick={() => setShowModal(true)}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          >
+            + Add Vehicle
+          </button>
+        </div>
       </div>
 
       {/* Fleet Stats */}
@@ -101,7 +101,9 @@ export function Vehicles() {
                 <div className={`w-10 h-10 rounded-lg ${stat.color} flex items-center justify-center`}>
                   <Icon className="w-5 h-5" />
                 </div>
-                <span className="text-2xl font-semibold text-gray-900">{stat.value}</span>
+                <span className="text-2xl font-semibold text-gray-900">
+                  {stat.label === 'Total Fleet' ? vehicles.length : typeof stat.value === 'function' ? stat.value(vehicles) : stat.value}
+                </span>
               </div>
               <p className="text-sm text-gray-600">{stat.label}</p>
             </div>
@@ -116,20 +118,21 @@ export function Vehicles() {
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">Maintenance Alerts</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="bg-white rounded-lg p-4 border border-yellow-100">
-                <p className="font-medium text-gray-900 mb-1">VH-891 - Service Due Soon</p>
-                <p className="text-sm text-gray-600 mb-2">Next maintenance in 2 days</p>
-                <button className="text-sm text-indigo-600 font-medium hover:text-indigo-700">
-                  Schedule Now →
-                </button>
-              </div>
-              <div className="bg-white rounded-lg p-4 border border-yellow-100">
-                <p className="font-medium text-gray-900 mb-1">VH-889 - In Service</p>
-                <p className="text-sm text-gray-600 mb-2">Maintenance in progress</p>
-                <button className="text-sm text-indigo-600 font-medium hover:text-indigo-700">
-                  View Details →
-                </button>
-              </div>
+              {vehicles.filter(v => v.health < 80 || v.status === 'Maintenance').length > 0 ? (
+                vehicles.filter(v => v.health < 80 || v.status === 'Maintenance').slice(0, 2).map(v => (
+                  <div key={v.id} className="bg-white rounded-lg p-4 border border-yellow-100">
+                    <p className="font-medium text-gray-900 mb-1">{v.id} - {v.status === 'Maintenance' ? 'In Service' : 'Service Due Soon'}</p>
+                    <p className="text-sm text-gray-600 mb-2">Health is at {v.health}%</p>
+                    <button className="text-sm text-indigo-600 font-medium hover:text-indigo-700">
+                      View Details →
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-2 text-sm text-gray-600 italic py-2">
+                  All active vehicles are healthy. No immediate maintenance required.
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -270,13 +273,129 @@ export function Vehicles() {
               <button className="flex-1 px-3 py-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors text-sm font-medium">
                 Track Live
               </button>
-              <button className="flex-1 px-3 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
-                View Details
+              <button 
+                onClick={() => deleteVehicle(vehicle.id)}
+                className="px-3 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
               </button>
             </div>
           </div>
         ))}
       </div>
+      {vehicles.length === 0 && (
+        <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
+          <TruckIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+          <h3 className="text-lg font-medium text-gray-900">No Vehicles Found</h3>
+          <p className="text-gray-500 mt-1">Add a new vehicle to start monitoring your fleet.</p>
+        </div>
+      )}
+
+      {/* Add Vehicle Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-900">Add New Vehicle</h2>
+              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-gray-100 rounded-lg text-gray-500">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle Model *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Volvo VNL, Freightliner Cascadia"
+                  value={form.model}
+                  onChange={(e) => handleFormChange('model', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Driver Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. John Smith"
+                  value={form.driver}
+                  onChange={(e) => handleFormChange('driver', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                  <select
+                    value={form.status}
+                    onChange={(e) => handleFormChange('status', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Idle">Idle</option>
+                    <option value="Maintenance">Maintenance</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mileage (km)</label>
+                  <input
+                    type="number"
+                    value={form.mileage}
+                    onChange={(e) => handleFormChange('mileage', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Main Depot, En route to Boston"
+                  value={form.location}
+                  onChange={(e) => handleFormChange('location', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Health (%)</label>
+                  <input
+                    type="number"
+                    min="0" max="100"
+                    value={form.health}
+                    onChange={(e) => handleFormChange('health', parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Fuel Level (%)</label>
+                  <input
+                    type="number"
+                    min="0" max="100"
+                    value={form.fuelLevel}
+                    onChange={(e) => handleFormChange('fuelLevel', parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-6 border-t border-gray-200">
+              <button
+                onClick={handleSubmitVehicle}
+                className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+              >
+                Add Vehicle
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
