@@ -38,6 +38,13 @@ export function useDashboard() {
     } : null);
   }, []);
 
+  const clearAllAlerts = useCallback(() => {
+    setData(prev => prev ? {
+      ...prev,
+      alerts: []
+    } : null);
+  }, []);
+
   const refreshData = useCallback(() => {
     setLoading(true);
     fetchData();
@@ -48,6 +55,7 @@ export function useDashboard() {
     loading,
     optimizeRoutes,
     dismissAlert,
+    clearAllAlerts,
     refreshData,
   };
 }

@@ -11,7 +11,7 @@ export interface WarehouseInfo {
 export function useWarehouses() {
   const [warehouses, setWarehouses] = useState<WarehouseInfo[]>(() => {
     try {
-      const saved = localStorage.getItem('optichain_warehouses_live');
+      const saved = localStorage.getItem('optichain_warehouses_v2');
       if (saved) return JSON.parse(saved);
     } catch (e) {
       console.error(e);
@@ -20,7 +20,7 @@ export function useWarehouses() {
   });
 
   useEffect(() => {
-    localStorage.setItem('optichain_warehouses_live', JSON.stringify(warehouses));
+    localStorage.setItem('optichain_warehouses_v2', JSON.stringify(warehouses));
   }, [warehouses]);
 
   const addWarehouse = (data: { name: string }) => {

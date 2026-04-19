@@ -20,7 +20,7 @@ export interface Shipment {
 export function useShipments() {
   const [shipments, setShipments] = useState<Shipment[]>(() => {
     try {
-      const saved = localStorage.getItem('optichain_shipments_v3');
+      const saved = localStorage.getItem('optichain_shipments_v5');
       if (saved) {
         return JSON.parse(saved);
       }
@@ -31,15 +31,15 @@ export function useShipments() {
   });
 
   useEffect(() => {
-    localStorage.setItem('optichain_shipments_v3', JSON.stringify(shipments));
+    localStorage.setItem('optichain_shipments_v5', JSON.stringify(shipments));
   }, [shipments]);
 
   // Force cache clear on hot reload so user sees empty without refresh
   useEffect(() => {
-    const hasCleared = localStorage.getItem('has_cleared_demo_v4');
+    const hasCleared = localStorage.getItem('has_cleared_demo_v5');
     if (!hasCleared) {
       setShipments([]);
-      localStorage.setItem('has_cleared_demo_v4', 'true');
+      localStorage.setItem('has_cleared_demo_v5', 'true');
     }
   }, []);
 

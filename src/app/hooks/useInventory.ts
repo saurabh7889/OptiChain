@@ -21,7 +21,7 @@ export interface InventoryItem {
 export function useInventory() {
   const [inventory, setInventory] = useState<InventoryItem[]>(() => {
     try {
-      const saved = localStorage.getItem('optichain_inventory_live');
+      const saved = localStorage.getItem('optichain_inventory_v2');
       if (saved) {
         return JSON.parse(saved);
       }
@@ -32,7 +32,7 @@ export function useInventory() {
   });
 
   useEffect(() => {
-    localStorage.setItem('optichain_inventory_live', JSON.stringify(inventory));
+    localStorage.setItem('optichain_inventory_v2', JSON.stringify(inventory));
   }, [inventory]);
 
   const addItem = (newItem: Omit<InventoryItem, 'id' | 'sku' | 'status' | 'trend'>) => {

@@ -30,7 +30,7 @@ function MapView({ center, zoom }: { center: [number, number], zoom: number }) {
 }
 
 export function Dashboard() {
-  const { data, loading, dismissAlert, refreshData } = useDashboard();
+  const { data, loading, dismissAlert, clearAllAlerts, refreshData } = useDashboard();
   const navigate = useNavigate();
 
   if (loading || !data) {
@@ -228,6 +228,7 @@ export function Dashboard() {
           
           <button 
             disabled={data.alerts.length === 0}
+            onClick={clearAllAlerts}
             className="mt-6 w-full py-3 px-4 bg-gray-50 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm font-bold text-gray-600 transition-all border border-gray-100"
           >
             Clear All Notifications

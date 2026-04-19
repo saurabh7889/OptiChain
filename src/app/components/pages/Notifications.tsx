@@ -1,4 +1,5 @@
-import { Bell, AlertTriangle, CheckCircle, Info, Package, TruckIcon, Warehouse } from 'lucide-react';
+import { Bell, AlertTriangle, CheckCircle, Info, Package, TruckIcon, Warehouse, Sparkles } from 'lucide-react';
+import { toast } from 'sonner';
 
 const notifications = [
   {
@@ -78,6 +79,17 @@ const notifications = [
 export function Notifications() {
   const unreadCount = notifications.filter((n) => !n.read).length;
 
+  const handleAISummary = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'AI is analyzing your notifications...',
+        success: 'AI Summary: You have 1 critical shipment delay, a low stock warning for SKU-4521, and an immediate brake system check needed for Truck VH-892.',
+        error: 'Failed to generate AI summary',
+      }
+    );
+  };
+
   const getNotificationStyles = (type: string) => {
     switch (type) {
       case 'critical':
@@ -118,6 +130,13 @@ export function Notifications() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <button 
+            onClick={handleAISummary}
+            className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium flex items-center gap-2 border border-purple-200"
+          >
+            <Sparkles className="w-4 h-4" />
+            AI Summary
+          </button>
           <button className="px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium">
             Mark All as Read
           </button>
