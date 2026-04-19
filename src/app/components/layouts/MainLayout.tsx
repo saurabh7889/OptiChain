@@ -15,7 +15,7 @@ import {
   Search,
   User,
 } from 'lucide-react';
-import { ThemeToggle } from '../components/ThemeToggle';
+import { ThemeToggle } from '../ThemeToggle';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
