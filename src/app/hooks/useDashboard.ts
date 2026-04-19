@@ -9,13 +9,18 @@ export function useDashboard() {
     try {
       // In a real production app, this URL would come from an environment variable
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      console.log(`[Dashboard Fetch] Attempting to fetch from: ${apiUrl}/api/dashboard`);
+      
       const response = await fetch(`${apiUrl}/api/dashboard`);
-      if (!response.ok) throw new Error('Backend synchronization failed');
+      if (!response.ok) {
+        console.error(`[Dashboard Fetch] Error status HTTP ${response.status}`);
+        throw new Error(`Backend synchronization failed: ${response.status}`);
+      }
       const jsonData = await response.json();
       setData(jsonData);
       setLoading(false);
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      console.error('[Dashboard Fetch] Failed to fetch dashboard data:', error);
       // We keep existing data if fetch fails after initial load
     }
   }, []);

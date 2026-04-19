@@ -68,6 +68,14 @@ def create_app():
         """
         return {"status": "healthy", "service": "optichain"}, 200
 
+    @app.route('/api/test', methods=['GET'])
+    def test_api():
+        """
+        Test endpoint to verify frontend-backend connectivity.
+        """
+        return {"status": "success", "message": "Backend is reachable!"}, 200
+
+
     return app
 
 # WSGI entry point — named "app" for gunicorn compatibility (gunicorn app:app)
