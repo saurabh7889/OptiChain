@@ -15,6 +15,7 @@ const fleetStats = [
 
 export function Vehicles() {
   const { vehicles, addVehicle, deleteVehicle } = useVehicles();
+  const [filterType, setFilterType] = useState<string>('All Vehicles');
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
     model: '',
@@ -51,6 +52,14 @@ export function Vehicles() {
     setForm({ model: '', driver: '', status: 'Idle', location: '', mileage: '0', fuelLevel: 100, health: 100 });
     toast.success('Vehicle added successfully!');
   };
+
+  const filteredVehicles = vehicles.filter(v => {
+    if (filterType === 'All Vehicles') return true;
+    if (filterType === 'Active' && v.status === 'Active') return true;
+    if (filterType === 'Idle' && v.status === 'Idle') return true;
+    if (filterType === 'Needs Maintenance' && (v.status === 'Maintenance' || v.health < 80)) return true;
+    return false;
+  });
 
   const handleAISummary = () => {
     const active = vehicles.filter(v => v.status === 'Active').length;
@@ -141,18 +150,19 @@ export function Vehicles() {
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex items-center gap-4 flex-wrap">
-          <button className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg font-medium">
-            All Vehicles
-          </button>
-          <button className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">
-            Active
-          </button>
-          <button className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">
-            Idle
-          </button>
-          <button className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">
-            Needs Maintenance
-          </button>
+          {['All Vehicles', 'Active', 'Idle', 'Needs Maintenance'].map(type => (
+            <button 
+              key={type}
+              onClick={() => setFilterType(type)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filterType === type 
+                ? 'bg-indigo-50 text-indigo-600' 
+                : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {type}
+            </button>
+          ))}
           <div className="ml-auto flex items-center gap-2">
             <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option>Sort by Health</option>
@@ -165,7 +175,7 @@ export function Vehicles() {
 
       {/* Vehicles Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {vehicles.map((vehicle, index) => (
+        {filteredVehicles.map((vehicle, index) => (
           <div key={index} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
@@ -284,11 +294,13 @@ export function Vehicles() {
           </div>
         ))}
       </div>
-      {vehicles.length === 0 && (
+      {filteredVehicles.length === 0 && (
         <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
           <TruckIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <h3 className="text-lg font-medium text-gray-900">No Vehicles Found</h3>
-          <p className="text-gray-500 mt-1">Add a new vehicle to start monitoring your fleet.</p>
+          <p className="text-gray-500 mt-1">
+            {vehicles.length === 0 ? 'Add a new vehicle to start monitoring your fleet.' : 'No vehicles match your current filter.'}
+          </p>
         </div>
       )}
 

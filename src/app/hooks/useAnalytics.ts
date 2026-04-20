@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { useShipments } from './useShipments';
 
 export interface DeliveryData {
   month: string;
@@ -94,5 +95,30 @@ export function useAnalytics() {
     setData(defaultState);
   };
 
-  return { data, loadMockData, clearData };
+  const { shipments } = useShipments();
+
+  const dynamicData = useMemo(() => {
+    let delivered = 0, inTransit = 0, delayed = 0, pending = 0;
+    shipments.forEach(s => {
+      if (s.status === 'Delivered') delivered++;
+      else if (s.status === 'In Transit') inTransit++;
+      else if (s.status === 'Delayed') delayed++;
+      else pending++;
+    });
+
+    // Only override distribution if we have actual live data, else use the state (which might be mock data)
+    const hasLiveShipments = shipments.length > 0;
+
+    return {
+      ...data,
+      shipmentDistribution: hasLiveShipments ? [
+        { name: 'Delivered', value: delivered },
+        { name: 'In Transit', value: inTransit },
+        { name: 'Delayed', value: delayed },
+        { name: 'Pending', value: pending },
+      ] : data.shipmentDistribution
+    };
+  }, [data, shipments]);
+
+  return { data: dynamicData, loadMockData, clearData };
 }

@@ -30,7 +30,7 @@ function MapView({ center, zoom }: { center: [number, number], zoom: number }) {
 }
 
 export function Dashboard() {
-  const { data, loading, dismissAlert, clearAllAlerts, refreshData } = useDashboard();
+  const { data, loading, error, dismissAlert, clearAllAlerts, refreshData } = useDashboard();
   const navigate = useNavigate();
 
   if (loading || !data) {
@@ -46,6 +46,13 @@ export function Dashboard() {
 
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto">
+      {/* Offline Banner */}
+      {error && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800 font-medium">
+          <span className="text-amber-500">⚠️</span>
+          <span>{error}</span>
+        </div>
+      )}
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

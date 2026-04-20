@@ -1,64 +1,82 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { DashboardData } from '../services/dashboardData';
+import { useShipments } from './useShipments';
+import { useVehicles } from './useVehicles';
+import { useInventory } from './useInventory';
+import { useOrders } from './useOrders';
 
 export function useDashboard() {
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { shipments } = useShipments();
+  const { vehicles } = useVehicles();
+  const { inventory } = useInventory();
+  const { orders } = useOrders();
 
-  const fetchData = useCallback(async () => {
-    try {
-      // In a real production app, this URL would come from an environment variable
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      console.log(`[Dashboard Fetch] Attempting to fetch from: ${apiUrl}/api/dashboard`);
-      
-      const response = await fetch(`${apiUrl}/api/dashboard`);
-      if (!response.ok) {
-        console.error(`[Dashboard Fetch] Error status HTTP ${response.status}`);
-        throw new Error(`Backend synchronization failed: ${response.status}`);
+  const [alerts, setAlerts] = useState<any[]>([]);
+
+  const data = useMemo(() => {
+    const totalShipments = shipments.length;
+    const delayedShipments = shipments.filter(s => s.status === 'Delayed').length;
+    
+    let healthSum = 0;
+    let validItems = 0;
+    inventory.forEach(item => {
+      if (item.capacity > 0) {
+        healthSum += (item.stock / item.capacity);
+        validItems++;
       }
-      const jsonData = await response.json();
-      setData(jsonData);
-      setLoading(false);
-    } catch (error) {
-      console.error('[Dashboard Fetch] Failed to fetch dashboard data:', error);
-      // We keep existing data if fetch fails after initial load
-    }
-  }, []);
+    });
+    const inventoryHealth = validItems > 0 ? Math.round((healthSum / validItems) * 100) : 0;
+    const activeVehicles = vehicles.filter(v => v.status === 'Active').length;
 
-  useEffect(() => {
-    fetchData();
-    // Real-time polling every 10 seconds
-    const interval = setInterval(fetchData, 10000);
-    return () => clearInterval(interval);
-  }, [fetchData]);
+    const mockActivities = orders.slice(0, 5).map(o => ({
+      id: o.id,
+      action: 'Order Placed',
+      item: `${o.customer} - ${o.value}`,
+      time: 'Recently',
+      status: 'success' as const
+    }));
+
+    return {
+      kpis: {
+        totalShipments,
+        delayedShipments,
+        inventoryHealth,
+        activeVehicles,
+        trends: { totalShipments: 0, delayedShipments: 0, inventoryHealth: 0, activeVehicles: 0 }
+      },
+      vehicles: vehicles.filter(v => v.status !== 'Idle').map((v) => ({
+        id: v.id,
+        lat: 20 + (Math.random() * 40 - 20),
+        lng: 0 + (Math.random() * 40 - 20),
+        status: v.health > 80 ? 'on-time' : 'delayed',
+        label: `${v.model} (${v.driver})`
+      })) as DashboardData['vehicles'],
+      alerts: alerts,
+      activities: mockActivities
+    };
+  }, [shipments, vehicles, inventory, orders, alerts]);
 
   const optimizeRoutes = useCallback(async () => {
-    console.log('Routing optimization request sent to Python engine');
-    // Ported from previous local simulator logic to placeholder for API call
+    console.log('Routing optimization simulated');
   }, []);
 
   const dismissAlert = useCallback((id: string) => {
-    setData(prev => prev ? {
-      ...prev,
-      alerts: prev.alerts.filter(a => a.id !== id)
-    } : null);
+    setAlerts(prev => prev.filter(a => a.id !== id));
   }, []);
 
   const clearAllAlerts = useCallback(() => {
-    setData(prev => prev ? {
-      ...prev,
-      alerts: []
-    } : null);
+    setAlerts([]);
   }, []);
 
   const refreshData = useCallback(() => {
-    setLoading(true);
-    fetchData();
-  }, [fetchData]);
+    // Data is inherently reactive via the other hooks, this is a placeholder
+    console.log('Force system sync triggered');
+  }, []);
 
   return {
     data,
-    loading,
+    loading: false,
+    error: null,
     optimizeRoutes,
     dismissAlert,
     clearAllAlerts,

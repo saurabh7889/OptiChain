@@ -11,7 +11,7 @@ export function Notifications() {
       toast.info("No unread notifications to summarize.");
       return;
     }
-    
+
     toast.promise(
       new Promise((resolve) => setTimeout(resolve, 1500)),
       {
@@ -62,14 +62,14 @@ export function Notifications() {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <button 
+          <button
             onClick={handleAISummary}
             className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium flex items-center gap-2 border border-purple-200"
           >
             <Sparkles className="w-4 h-4" />
             Vizard AI Summary
           </button>
-          <button 
+          <button
             onClick={() => {
               markAllAsReadAndClear();
               toast.success("All notifications cleared!");
@@ -126,13 +126,11 @@ export function Notifications() {
           };
           const Icon = getIconComponent(notification.iconType);
           const styles = getNotificationStyles(notification.type);
-
           return (
             <div
               key={notification.id}
-              className={`bg-white rounded-xl border transition-all ${
-                notification.read ? 'border-gray-200' : 'border-indigo-200 shadow-sm'
-              }`}
+              className={`bg-white rounded-xl border transition-all ${notification.read ? 'border-gray-200' : 'border-indigo-200 shadow-sm'
+                }`}
             >
               <div className="p-5">
                 <div className="flex gap-4">
@@ -147,9 +145,8 @@ export function Notifications() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <h3
-                        className={`font-semibold ${
-                          notification.read ? 'text-gray-900' : 'text-gray-900'
-                        }`}
+                        className={`font-semibold ${notification.read ? 'text-gray-900' : 'text-gray-900'
+                          }`}
                       >
                         {notification.title}
                       </h3>
@@ -162,14 +159,14 @@ export function Notifications() {
                       <span className="text-xs text-gray-500">{notification.timestamp}</span>
                       <div className="flex items-center gap-2">
                         {!notification.read && (
-                          <button 
+                          <button
                             onClick={() => markAsRead(notification.id)}
                             className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
                           >
                             Mark as Read
                           </button>
                         )}
-                        <button 
+                        <button
                           onClick={() => deleteNotification(notification.id)}
                           className="text-xs text-red-600 hover:text-red-700 font-medium ml-2"
                         >

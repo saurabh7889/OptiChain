@@ -3,6 +3,16 @@ import { StatusBadge } from '../shared/StatusBadge';
 
 import { useOrders } from '../../hooks/useOrders';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useState } from 'react';
+import { NewOrderModal } from '../shared/NewOrderModal';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '../ui/context-menu';
+import { Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const chartData = [
   { name: 'Mon', orders: 12 },
@@ -23,17 +33,26 @@ const orderStatuses = [
 
 export function Orders() {
   const { orders, addOrder, deleteOrder } = useOrders();
+  const [filterType, setFilterType] = useState<string>('All Orders');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleNewOrder = () => {
-    addOrder({
-      customer: 'New Walk-in Customer',
-      items: Math.floor(Math.random() * 20) + 1,
-      value: `$${Math.floor(Math.random() * 5000) + 100}`,
-      status: 'Pending',
-      date: new Date().toISOString().split('T')[0],
-      shipmentId: null,
-      inventoryImpact: 'Low',
-      priority: 'medium',
+  const filteredOrders = orders.filter(order => {
+    if (filterType === 'All Orders') return true;
+    if (filterType === 'Pending' && order.status === 'Pending') return true;
+    if (filterType === 'Processing' && order.status === 'Processing') return true;
+    if (filterType === 'High Priority' && order.priority === 'high') return true;
+    return false;
+  });
+
+  const handleNewOrder = (data: any) => {
+    addOrder(data);
+    toast.success('Order created successfully!');
+  };
+
+  const handleDeleteOrder = (id: string) => {
+    deleteOrder(id);
+    toast.error(`Order ${id} deleted.`, {
+      icon: <Trash2 className="w-4 h-4 text-red-500" />
     });
   };
 
@@ -46,7 +65,7 @@ export function Orders() {
           <p className="text-gray-600 mt-1">Manage order lifecycle from placement to delivery</p>
         </div>
         <button 
-          onClick={handleNewOrder}
+          onClick={() => setIsModalOpen(true)}
           className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
         >
           + New Order
@@ -96,18 +115,19 @@ export function Orders() {
       {/* Filters */}
       <div className="bg-white rounded-xl border border-gray-200 p-4">
         <div className="flex items-center gap-4 flex-wrap">
-          <button className="px-4 py-2 bg-indigo-50 text-indigo-600 rounded-lg font-medium">
-            All Orders
-          </button>
-          <button className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">
-            Pending
-          </button>
-          <button className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">
-            Processing
-          </button>
-          <button className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg font-medium">
-            High Priority
-          </button>
+          {['All Orders', 'Pending', 'Processing', 'High Priority'].map(type => (
+            <button 
+              key={type}
+              onClick={() => setFilterType(type)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                filterType === type 
+                ? 'bg-indigo-50 text-indigo-600' 
+                : 'text-gray-600 hover:bg-gray-50'
+              }`}
+            >
+              {type}
+            </button>
+          ))}
           <div className="ml-auto flex items-center gap-2">
             <select className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
               <option>Last 7 days</option>
@@ -148,77 +168,96 @@ export function Orders() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {orders.map((order, index) => (
-                <tr key={index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-gray-900">{order.id}</p>
-                      {order.priority === 'high' && (
-                        <span className="bg-red-100 text-red-700 text-xs font-medium px-2 py-0.5 rounded">
-                          High
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500">{order.date}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                        <User className="w-4 h-4 text-gray-600" />
-                      </div>
-                      <p className="text-sm text-gray-900">{order.customer}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="text-sm font-medium text-gray-900">{order.items} items</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <DollarSign className="w-3 h-3 text-gray-500" />
-                      <p className="text-sm text-gray-600">{order.value}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    {order.status === 'Pending' && <StatusBadge status="neutral" label="Pending" size="sm" />}
-                    {order.status === 'Processing' && <StatusBadge status="info" label="Processing" size="sm" />}
-                    {order.status === 'Shipped' && <StatusBadge status="warning" label="Shipped" size="sm" />}
-                    {order.status === 'Delivered' && <StatusBadge status="success" label="Delivered" size="sm" />}
-                  </td>
-                  <td className="px-6 py-4">
-                    {order.shipmentId ? (
-                      <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
-                        {order.shipmentId} →
-                      </button>
-                    ) : (
-                      <span className="text-sm text-gray-400">Not assigned</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`text-sm ${
-                        order.inventoryImpact === 'High'
-                          ? 'text-red-600'
-                          : order.inventoryImpact === 'Medium'
-                          ? 'text-yellow-600'
-                          : 'text-green-600'
-                      }`}
-                    >
-                      {order.inventoryImpact}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button className="px-3 py-1.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
-                        View
-                      </button>
-                      <button 
-                        onClick={() => deleteOrder(order.id)}
-                        className="px-3 py-1.5 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
-                      >
-                        Delete
-                      </button>
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={7}>
+                    <div className="text-center py-12">
+                      <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900">No orders found</h3>
+                      <p className="text-gray-500">Create a new order to populate the system.</p>
                     </div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+              filteredOrders.map((order, index) => (
+                <ContextMenu key={order.id}>
+                  <ContextMenuTrigger asChild>
+                    <tr className="hover:bg-gray-50 cursor-context-menu">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-gray-900">{order.id}</p>
+                          {order.priority === 'high' && (
+                            <span className="bg-red-100 text-red-700 text-xs font-medium px-2 py-0.5 rounded">
+                              High
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-500">{order.date}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                            <User className="w-4 h-4 text-gray-600" />
+                          </div>
+                          <p className="text-sm text-gray-900">{order.customer}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-medium text-gray-900">{order.items} items</p>
+                        <div className="flex items-center gap-1 mt-1">
+                          <DollarSign className="w-3 h-3 text-gray-500" />
+                          <p className="text-sm text-gray-600">{order.value}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {order.status === 'Pending' && <StatusBadge status="neutral" label="Pending" size="sm" />}
+                        {order.status === 'Processing' && <StatusBadge status="info" label="Processing" size="sm" />}
+                        {order.status === 'Shipped' && <StatusBadge status="warning" label="Shipped" size="sm" />}
+                        {order.status === 'Delivered' && <StatusBadge status="success" label="Delivered" size="sm" />}
+                      </td>
+                      <td className="px-6 py-4">
+                        {order.shipmentId ? (
+                          <button className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                            {order.shipmentId} →
+                          </button>
+                        ) : (
+                          <span className="text-sm text-gray-400">Not assigned</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`text-sm ${
+                            order.inventoryImpact === 'High'
+                              ? 'text-red-600'
+                              : order.inventoryImpact === 'Medium'
+                              ? 'text-yellow-600'
+                              : 'text-green-600'
+                          }`}
+                        >
+                          {order.inventoryImpact}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button className="px-3 py-1.5 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
+                            View
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </ContextMenuTrigger>
+                  <ContextMenuContent className="w-48 bg-white border border-gray-200 shadow-xl rounded-xl">
+                    <ContextMenuItem 
+                      onClick={() => handleDeleteOrder(order.id)}
+                      className="text-red-600 flex items-center gap-2 cursor-pointer font-medium p-2 text-sm hover:!bg-red-50 hover:!text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete Order
+                    </ContextMenuItem>
+                  </ContextMenuContent>
+                </ContextMenu>
+              ))
+              )}
             </tbody>
           </table>
         </div>
@@ -269,6 +308,11 @@ export function Orders() {
           </div>
         </div>
       </div>
+      <NewOrderModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleNewOrder}
+      />
     </div>
   );
 }
