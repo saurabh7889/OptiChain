@@ -6,6 +6,7 @@ import { useShipments } from '../../hooks/useShipments';
 import { useVehicles } from '../../hooks/useVehicles';
 import { useInventory } from '../../hooks/useInventory';
 import { useOrders } from '../../hooks/useOrders';
+import { useNotifications } from '../../hooks/useNotifications';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -39,6 +40,7 @@ export function Dashboard() {
   const { loadMockData: loadVehicles, clearData: clearVehicles } = useVehicles();
   const { loadMockData: loadInventory, clearData: clearInventory } = useInventory();
   const { loadMockData: loadOrders, clearData: clearOrders } = useOrders();
+  const { loadMockData: loadNotifications, clearData: clearNotifications } = useNotifications();
   const navigate = useNavigate();
 
   const handleLoadMockData = () => {
@@ -46,6 +48,7 @@ export function Dashboard() {
     loadVehicles();
     loadInventory();
     loadOrders();
+    loadNotifications();
     toast.success('Mock data loaded across all modules');
   };
 
@@ -54,6 +57,7 @@ export function Dashboard() {
     clearVehicles();
     clearInventory();
     clearOrders();
+    clearNotifications();
     toast.success('All mock data cleared');
   };
 

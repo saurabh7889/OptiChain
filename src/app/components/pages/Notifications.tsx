@@ -1,9 +1,9 @@
-import { Bell, AlertTriangle, CheckCircle, Info, Package, TruckIcon, Warehouse, Sparkles, Trash2 } from 'lucide-react';
+import { Bell, AlertTriangle, CheckCircle, Info, Package, TruckIcon, Warehouse, Sparkles, Trash2, Database } from 'lucide-react';
 import { toast } from 'sonner';
 import { useNotifications } from '../../hooks/useNotifications';
 
 export function Notifications() {
-  const { notifications, markAllAsReadAndClear, markAsRead, deleteNotification } = useNotifications();
+  const { notifications, markAllAsReadAndClear, markAsRead, deleteNotification, loadMockData, clearData } = useNotifications();
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleAISummary = () => {
@@ -68,6 +68,13 @@ export function Notifications() {
           >
             <Sparkles className="w-4 h-4" />
             Vizard AI Summary
+          </button>
+          <button
+            onClick={notifications.length === 0 ? loadMockData : clearData}
+            className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium flex items-center gap-2 border border-purple-200"
+          >
+            <Database className="w-4 h-4" />
+            {notifications.length === 0 ? 'Load Mock Data' : 'Clear Data'}
           </button>
           <button
             onClick={() => {

@@ -46,5 +46,18 @@ export function useNotifications() {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  return { notifications, addNotification, markAllAsReadAndClear, markAsRead, deleteNotification };
+  const loadMockData = () => {
+    setNotifications([
+      { id: 1, type: 'critical', iconType: 'alert', title: 'Route Delay: SH-8403', message: 'Vehicle VH-103 is experiencing heavy delays due to a storm in the Northeast region. Estimated delay: 4 hours.', timestamp: '10 mins ago', read: false },
+      { id: 2, type: 'warning', iconType: 'warehouse', title: 'Low Stock Alert: Cooling Fans', message: 'Stock level for "Cooling Fans" in TX-South has fallen below reorder point (45/100).', timestamp: '1 hour ago', read: false },
+      { id: 3, type: 'info', iconType: 'truck', title: 'Maintenance Scheduled', message: 'Vehicle VH-103 is scheduled for engine maintenance next week.', timestamp: '3 hours ago', read: true },
+      { id: 4, type: 'success', iconType: 'package', title: 'Shipment Delivered', message: 'SH-8402 has been successfully delivered to Miami Depot.', timestamp: '5 hours ago', read: true }
+    ]);
+  };
+
+  const clearData = () => {
+    setNotifications([]);
+  };
+
+  return { notifications, addNotification, markAllAsReadAndClear, markAsRead, deleteNotification, loadMockData, clearData };
 }
