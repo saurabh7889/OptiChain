@@ -2,6 +2,7 @@ import { Package, TruckIcon, AlertTriangle, Warehouse, Activity, Zap, RefreshCw,
 import { KPICard } from '../shared/KPICard';
 import { AlertCard } from '../shared/AlertCard';
 import { useDashboard } from '../../hooks/useDashboard';
+import { useShipments } from '../../hooks/useShipments';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -31,6 +32,7 @@ function MapView({ center, zoom }: { center: [number, number], zoom: number }) {
 
 export function Dashboard() {
   const { data, loading, error, dismissAlert, clearAllAlerts, refreshData } = useDashboard();
+  const { shipments } = useShipments();
   const navigate = useNavigate();
 
   if (loading || !data) {
@@ -159,10 +161,36 @@ export function Dashboard() {
                   </Popup>
                 </Marker>
               ))}
+
+              {/* Local Shipments Simulated Vehicles */}
+              {shipments.filter(s => s.status !== 'Delivered').map((shipment) => {
+                 const seed = parseInt(shipment.id.split('-')[1] || "0", 10);
+                 const startLat = 30 + (seed % 20); 
+                 const startLng = -120 + ((seed * 7) % 50); 
+                 
+                 const endLat = 30 + ((seed * 3) % 20);
+                 const endLng = -120 + ((seed * 11) % 50);
+                 
+                 const lat = startLat + (endLat - startLat) * (shipment.progress / 100);
+                 const lng = startLng + (endLng - startLng) * (shipment.progress / 100);
+
+                 return (
+                   <Marker key={shipment.id} position={[lat, lng]}>
+                     <Popup>
+                       <div className="p-1">
+                         <p className="font-bold text-indigo-600">{shipment.vehicle} <span className="text-xs text-gray-400">({shipment.id})</span></p>
+                         <p className="text-xs text-gray-500 mt-0.5">Origin: {shipment.origin}</p>
+                         <p className="text-xs text-gray-500 mt-0.5">Destination: {shipment.destination}</p>
+                         <p className="text-xs text-gray-500 mt-0.5">Status: {shipment.status.toUpperCase()} ({shipment.progress}%)</p>
+                       </div>
+                     </Popup>
+                   </Marker>
+                 );
+              })}
             </MapContainer>
 
             {/* Empty State Overlay if no vehicles */}
-            {data.vehicles.length === 0 && (
+            {(data.vehicles.length === 0 && shipments.filter(s => s.status !== 'Delivered').length === 0) && (
               <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] pointer-events-none flex items-center justify-center z-[500]">
                 <div className="bg-white/95 backdrop-blur-md p-6 rounded-2xl shadow-2xl border border-white/50 text-center max-w-sm mx-4 transform transition-all">
                   <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100">
@@ -180,9 +208,9 @@ export function Dashboard() {
           {/* Map Controls / Summary */}
           <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'In Transit', value: 0, color: 'indigo' },
-              { label: 'Completed', value: 0, color: 'green' },
-              { label: 'Delayed', value: 0, color: 'red' },
+              { label: 'In Transit', value: shipments.filter(s => s.status === 'In Transit').length + data.vehicles.filter(v => v.status === 'in_transit').length, color: 'indigo' },
+              { label: 'Completed', value: shipments.filter(s => s.status === 'Delivered').length + data.vehicles.filter(v => v.status === 'completed').length, color: 'green' },
+              { label: 'Delayed', value: shipments.filter(s => s.status === 'Delayed').length + data.vehicles.filter(v => v.status === 'delayed').length, color: 'red' },
               { label: 'Off-Route', value: 0, color: 'yellow' },
             ].map((stat, idx) => (
               <div key={idx} className="bg-gray-50/50 p-4 rounded-xl border border-gray-100/50 hover:bg-gray-50 transition-colors">
