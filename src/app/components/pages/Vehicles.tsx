@@ -2,15 +2,15 @@ import { TruckIcon, Wrench, AlertTriangle, CheckCircle, Activity, Fuel, X, Datab
 import { StatusBadge } from '../shared/StatusBadge';
 import { ProgressBar } from '../shared/ProgressBar';
 import { useState } from 'react';
-import { useVehicles } from '../../hooks/useVehicles';
+import { useVehicles, Vehicle } from '../../hooks/useVehicles';
 import { toast } from 'sonner';
 import { Sparkles, Trash2 } from 'lucide-react';
 
 const fleetStats = [
-  { label: 'Total Fleet', value: (count: number) => count, icon: TruckIcon, color: 'bg-indigo-50 text-indigo-600' },
-  { label: 'Active', value: (v: any[]) => v.filter(x => x.status === 'Active').length, icon: Activity, color: 'bg-green-50 text-green-600' },
-  { label: 'Idle', value: (v: any[]) => v.filter(x => x.status === 'Idle').length, icon: CheckCircle, color: 'bg-gray-50 text-gray-600' },
-  { label: 'Maintenance', value: (v: any[]) => v.filter(x => x.status === 'Maintenance').length, icon: Wrench, color: 'bg-red-50 text-red-600' },
+  { label: 'Total Fleet', value: (v: Vehicle[]) => v.length, icon: TruckIcon, color: 'bg-indigo-50 text-indigo-600' },
+  { label: 'Active', value: (v: Vehicle[]) => v.filter(x => x.status === 'Active').length, icon: Activity, color: 'bg-green-50 text-green-600' },
+  { label: 'Idle', value: (v: Vehicle[]) => v.filter(x => x.status === 'Idle').length, icon: CheckCircle, color: 'bg-gray-50 text-gray-600' },
+  { label: 'Maintenance', value: (v: Vehicle[]) => v.filter(x => x.status === 'Maintenance').length, icon: Wrench, color: 'bg-red-50 text-red-600' },
 ];
 
 export function Vehicles() {
@@ -118,7 +118,7 @@ export function Vehicles() {
                   <Icon className="w-5 h-5" />
                 </div>
                 <span className="text-2xl font-semibold text-gray-900">
-                  {stat.label === 'Total Fleet' ? vehicles.length : typeof stat.value === 'function' ? stat.value(vehicles) : stat.value}
+                  {typeof stat.value === 'function' ? stat.value(vehicles) : stat.value}
                 </span>
               </div>
               <p className="text-sm text-gray-600">{stat.label}</p>

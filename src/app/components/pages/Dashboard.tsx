@@ -241,8 +241,8 @@ export function Dashboard() {
           {/* Map Controls / Summary */}
           <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { label: 'In Transit', value: shipments.filter(s => s.status === 'In Transit').length + data.vehicles.filter(v => v.status === 'in_transit').length, color: 'indigo' },
-              { label: 'Completed', value: shipments.filter(s => s.status === 'Delivered').length + data.vehicles.filter(v => v.status === 'completed').length, color: 'green' },
+              { label: 'In Transit', value: shipments.filter(s => s.status === 'In Transit').length + data.vehicles.filter(v => v.status === 'in-transit').length, color: 'indigo' },
+              { label: 'Completed', value: shipments.filter(s => s.status === 'Delivered').length + data.vehicles.filter(v => v.status === 'on-time').length, color: 'green' },
               { label: 'Delayed', value: shipments.filter(s => s.status === 'Delayed').length + data.vehicles.filter(v => v.status === 'delayed').length, color: 'red' },
               { label: 'Off-Route', value: 0, color: 'yellow' },
             ].map((stat, idx) => (
