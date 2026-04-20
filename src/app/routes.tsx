@@ -8,10 +8,15 @@ import { Vehicles } from "./components/pages/Vehicles";
 import { Analytics } from "./components/pages/Analytics";
 import { Notifications } from "./components/pages/Notifications";
 import { Settings } from "./components/pages/Settings";
+import { LandingPage } from "./components/pages/LandingPage";
 
 export const router = createBrowserRouter([
   {
     path: "/",
+    Component: LandingPage,
+  },
+  {
+    path: "/dashboard",
     Component: MainLayout,
     children: [
       { index: true, Component: Dashboard },

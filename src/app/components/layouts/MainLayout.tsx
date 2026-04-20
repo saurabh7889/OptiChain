@@ -22,14 +22,14 @@ import {
 } from 'lucide-react';
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/shipments', label: 'Shipments', icon: Package },
-  { path: '/inventory', label: 'Inventory', icon: Warehouse },
-  { path: '/orders', label: 'Orders', icon: ShoppingCart },
-  { path: '/vehicles', label: 'Vehicles', icon: Truck },
-  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { path: '/notifications', label: 'Notifications', icon: Bell },
-  { path: '/settings', label: 'Settings', icon: Settings },
+  { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/dashboard/shipments', label: 'Shipments', icon: Package },
+  { path: '/dashboard/inventory', label: 'Inventory', icon: Warehouse },
+  { path: '/dashboard/orders', label: 'Orders', icon: ShoppingCart },
+  { path: '/dashboard/vehicles', label: 'Vehicles', icon: Truck },
+  { path: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
+  { path: '/dashboard/notifications', label: 'Notifications', icon: Bell },
+  { path: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
 export function MainLayout() {
@@ -85,7 +85,7 @@ export function MainLayout() {
             const Icon = item.icon;
             const isActive =
               location.pathname === item.path ||
-              (item.path !== '/' && location.pathname.startsWith(item.path));
+              (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
 
             return (
               <Link
@@ -124,7 +124,7 @@ export function MainLayout() {
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+            const isActive = location.pathname === item.path || (item.path !== '/dashboard' && location.pathname.startsWith(item.path));
             return (
               <Link
                 key={item.path}
@@ -161,7 +161,7 @@ export function MainLayout() {
 
           <div className="flex items-center gap-3 md:gap-4 ml-4">
             <button 
-              onClick={() => navigate('/notifications')}
+              onClick={() => navigate('/dashboard/notifications')}
               className="relative p-2 rounded-lg hover:bg-gray-100 text-gray-600"
             >
               <Bell className="w-5 h-5" />
@@ -172,7 +172,7 @@ export function MainLayout() {
               )}
             </button>
             <button 
-              onClick={() => navigate('/settings')}
+              onClick={() => navigate('/dashboard/settings')}
               className="flex items-center gap-2 p-1 rounded-lg hover:bg-gray-100"
             >
               <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
