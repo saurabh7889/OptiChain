@@ -14,27 +14,30 @@ import {
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
-const chartData = [
-  { name: 'Mon', orders: 12 },
-  { name: 'Tue', orders: 19 },
-  { name: 'Wed', orders: 15 },
-  { name: 'Thu', orders: 28 },
-  { name: 'Fri', orders: 22 },
-  { name: 'Sat', orders: 35 },
-  { name: 'Sun', orders: 42 },
-];
 
-const orderStatuses = [
-  { label: 'Pending', count: 45, icon: Clock, color: 'text-gray-600' },
-  { label: 'Processing', count: 23, icon: Package, color: 'text-blue-600' },
-  { label: 'Shipped', count: 67, icon: TruckIcon, color: 'text-indigo-600' },
-  { label: 'Delivered', count: 189, icon: CheckCircle, color: 'text-green-600' },
-];
 
 export function Orders() {
   const { orders, addOrder, deleteOrder, loadMockData, clearData } = useOrders();
   const [filterType, setFilterType] = useState<string>('All Orders');
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const orderStatuses = [
+    { label: 'Pending', count: orders.filter(o => o.status === 'Pending').length, icon: Clock, color: 'text-gray-600' },
+    { label: 'Processing', count: orders.filter(o => o.status === 'Processing').length, icon: Package, color: 'text-blue-600' },
+    { label: 'Shipped', count: orders.filter(o => o.status === 'Shipped').length, icon: TruckIcon, color: 'text-indigo-600' },
+    { label: 'Delivered', count: orders.filter(o => o.status === 'Delivered').length, icon: CheckCircle, color: 'text-green-600' },
+  ];
+
+  const hasOrders = orders.length > 0;
+  const chartData = [
+    { name: 'Mon', orders: hasOrders ? 12 : 0 },
+    { name: 'Tue', orders: hasOrders ? 19 : 0 },
+    { name: 'Wed', orders: hasOrders ? 15 : 0 },
+    { name: 'Thu', orders: hasOrders ? 28 : 0 },
+    { name: 'Fri', orders: hasOrders ? 22 : 0 },
+    { name: 'Sat', orders: hasOrders ? 35 : 0 },
+    { name: 'Sun', orders: hasOrders ? 42 : 0 },
+  ];
 
   const filteredOrders = orders.filter(order => {
     if (filterType === 'All Orders') return true;
