@@ -57,9 +57,24 @@ export function useInventory() {
     setInventory(prev => prev.filter(item => item.id !== id));
   };
 
+  const loadMockData = () => {
+    setInventory([
+      { id: 'INV-4921', sku: 'SKU-5442', name: 'Industrial Motors (Type A)', warehouse: 'NY-Central', stock: 450, capacity: 1000, reorderPoint: 200, movementRate: 'High', status: 'In Stock', lastRestocked: '2 days ago', trend: 'up' },
+      { id: 'INV-4922', sku: 'SKU-8910', name: 'Cooling Fans', warehouse: 'TX-South', stock: 45, capacity: 500, reorderPoint: 100, movementRate: 'High', status: 'Critical', lastRestocked: '3 weeks ago', trend: 'down' },
+      { id: 'INV-4923', sku: 'SKU-1102', name: 'Hydraulic Pumps', warehouse: 'CA-West', stock: 150, capacity: 600, reorderPoint: 250, movementRate: 'Medium', status: 'Low Stock', lastRestocked: '1 month ago', trend: 'stable' },
+      { id: 'INV-4924', sku: 'SKU-3329', name: 'Steel Bearings', warehouse: 'NY-Central', stock: 8500, capacity: 10000, reorderPoint: 2000, movementRate: 'Low', status: 'In Stock', lastRestocked: '1 week ago', trend: 'up' }
+    ]);
+  };
+
+  const clearData = () => {
+    setInventory([]);
+  };
+
   return {
     inventory,
     addItem,
-    deleteItem
+    deleteItem,
+    loadMockData,
+    clearData
   };
 }

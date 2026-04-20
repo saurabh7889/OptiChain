@@ -118,9 +118,24 @@ export function useShipments() {
     setShipments(prev => prev.filter(shipment => shipment.id !== id));
   };
 
+  const loadMockData = () => {
+    setShipments([
+      { id: 'SH-8401', origin: 'New York, NY', destination: 'Los Angeles, CA', status: 'In Transit', progress: 65, eta: '2 days', vehicle: 'VH-101', driver: 'John Doe', items: 120, weight: '1,450 kg', priority: 'high' },
+      { id: 'SH-8402', origin: 'Chicago, IL', destination: 'Miami, FL', status: 'Delivered', progress: 100, eta: 'Completed', vehicle: 'VH-102', driver: 'Jane Smith', items: 45, weight: '300 kg', priority: 'medium' },
+      { id: 'SH-8403', origin: 'Boston, MA', destination: 'Seattle, WA', status: 'Delayed', progress: 25, eta: 'Delayed (Weather)', vehicle: 'VH-103', driver: 'Mike Johnson', items: 85, weight: '890 kg', priority: 'high' },
+      { id: 'SH-8404', origin: 'Austin, TX', destination: 'Denver, CO', status: 'Packed', progress: 0, eta: 'Calculating...', vehicle: 'VH-104', driver: 'Sarah Williams', items: 210, weight: '2,100 kg', priority: 'low' }
+    ]);
+  };
+
+  const clearData = () => {
+    setShipments([]);
+  };
+
   return {
     shipments,
     addShipment,
-    deleteShipment
+    deleteShipment,
+    loadMockData,
+    clearData
   };
 }

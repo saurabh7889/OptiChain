@@ -36,5 +36,18 @@ export function useOrders() {
     setOrders(prev => prev.filter(o => o.id !== id));
   };
 
-  return { orders, addOrder, deleteOrder };
+  const loadMockData = () => {
+    setOrders([
+      { id: 'ORD-7521', customer: 'Acme Corp', items: 3, value: '$4,500', status: 'Processing', date: '2023-11-20', shipmentId: 'SH-8401', inventoryImpact: 'Medium', priority: 'high' },
+      { id: 'ORD-7522', customer: 'Global Motors', items: 12, value: '$18,200', status: 'Pending', date: '2023-11-21', shipmentId: null, inventoryImpact: 'High', priority: 'medium' },
+      { id: 'ORD-7523', customer: 'TechStart Inc', items: 1, value: '$1,200', status: 'Shipped', date: '2023-11-18', shipmentId: 'SH-8403', inventoryImpact: 'Low', priority: 'medium' },
+      { id: 'ORD-7524', customer: 'BuildWell Construction', items: 45, value: '$56,000', status: 'Delivered', date: '2023-11-15', shipmentId: 'SH-8402', inventoryImpact: 'High', priority: 'low' }
+    ]);
+  };
+
+  const clearData = () => {
+    setOrders([]);
+  };
+
+  return { orders, addOrder, deleteOrder, loadMockData, clearData };
 }

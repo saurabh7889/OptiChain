@@ -1,8 +1,11 @@
-import { Package, TruckIcon, AlertTriangle, Warehouse, Activity, Zap, RefreshCw, Search, Box } from 'lucide-react';
+import { Package, TruckIcon, AlertTriangle, Warehouse, Activity, Zap, RefreshCw, Search, Box, Database } from 'lucide-react';
 import { KPICard } from '../shared/KPICard';
 import { AlertCard } from '../shared/AlertCard';
 import { useDashboard } from '../../hooks/useDashboard';
 import { useShipments } from '../../hooks/useShipments';
+import { useVehicles } from '../../hooks/useVehicles';
+import { useInventory } from '../../hooks/useInventory';
+import { useOrders } from '../../hooks/useOrders';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
@@ -32,8 +35,27 @@ function MapView({ center, zoom }: { center: [number, number], zoom: number }) {
 
 export function Dashboard() {
   const { data, loading, error, dismissAlert, clearAllAlerts, refreshData } = useDashboard();
-  const { shipments } = useShipments();
+  const { shipments, loadMockData: loadShipments, clearData: clearShipments } = useShipments();
+  const { loadMockData: loadVehicles, clearData: clearVehicles } = useVehicles();
+  const { loadMockData: loadInventory, clearData: clearInventory } = useInventory();
+  const { loadMockData: loadOrders, clearData: clearOrders } = useOrders();
   const navigate = useNavigate();
+
+  const handleLoadMockData = () => {
+    loadShipments();
+    loadVehicles();
+    loadInventory();
+    loadOrders();
+    toast.success('Mock data loaded across all modules');
+  };
+
+  const handleClearData = () => {
+    clearShipments();
+    clearVehicles();
+    clearInventory();
+    clearOrders();
+    toast.success('All mock data cleared');
+  };
 
   if (loading || !data) {
     return (
@@ -70,6 +92,13 @@ export function Dashboard() {
               className="pl-9 pr-4 py-2 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none w-64 bg-white/50 backdrop-blur-sm transition-all"
             />
           </div>
+          <button 
+            onClick={shipments.length === 0 ? handleLoadMockData : handleClearData}
+            className="flex items-center gap-2 px-4 py-2.5 bg-purple-50 text-purple-600 rounded-xl text-sm font-semibold hover:bg-purple-100 transition-all border border-purple-200"
+          >
+            <Database className="w-4 h-4" />
+            {shipments.length === 0 ? 'Load Mock Data' : 'Clear Data'}
+          </button>
           <button 
             onClick={() => {
               refreshData();

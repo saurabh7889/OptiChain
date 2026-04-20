@@ -1,4 +1,4 @@
-import { ShoppingCart, Package, TruckIcon, CheckCircle, Clock, User, DollarSign } from 'lucide-react';
+import { ShoppingCart, Package, TruckIcon, CheckCircle, Clock, User, DollarSign, Database } from 'lucide-react';
 import { StatusBadge } from '../shared/StatusBadge';
 
 import { useOrders } from '../../hooks/useOrders';
@@ -32,7 +32,7 @@ const orderStatuses = [
 ];
 
 export function Orders() {
-  const { orders, addOrder, deleteOrder } = useOrders();
+  const { orders, addOrder, deleteOrder, loadMockData, clearData } = useOrders();
   const [filterType, setFilterType] = useState<string>('All Orders');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -64,12 +64,21 @@ export function Orders() {
           <h1 className="text-2xl font-semibold text-gray-900">Orders</h1>
           <p className="text-gray-600 mt-1">Manage order lifecycle from placement to delivery</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-        >
-          + New Order
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={orders.length === 0 ? loadMockData : clearData}
+            className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium flex items-center gap-2 border border-purple-200"
+          >
+            <Database className="w-4 h-4" />
+            {orders.length === 0 ? 'Load Mock Data' : 'Clear Data'}
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          >
+            + New Order
+          </button>
+        </div>
       </div>
 
       {/* Order Status Overview */}

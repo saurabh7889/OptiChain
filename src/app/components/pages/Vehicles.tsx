@@ -1,4 +1,4 @@
-import { TruckIcon, Wrench, AlertTriangle, CheckCircle, Activity, Fuel, X } from 'lucide-react';
+import { TruckIcon, Wrench, AlertTriangle, CheckCircle, Activity, Fuel, X, Database } from 'lucide-react';
 import { StatusBadge } from '../shared/StatusBadge';
 import { ProgressBar } from '../shared/ProgressBar';
 import { useState } from 'react';
@@ -14,7 +14,7 @@ const fleetStats = [
 ];
 
 export function Vehicles() {
-  const { vehicles, addVehicle, deleteVehicle } = useVehicles();
+  const { vehicles, addVehicle, deleteVehicle, loadMockData, clearData } = useVehicles();
   const [filterType, setFilterType] = useState<string>('All Vehicles');
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({
@@ -84,6 +84,13 @@ export function Vehicles() {
           <p className="text-gray-600 mt-1">Monitor vehicle health and maintenance schedules</p>
         </div>
         <div className="flex items-center gap-2">
+          <button 
+            onClick={vehicles.length === 0 ? loadMockData : clearData}
+            className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium flex items-center gap-2 border border-purple-200"
+          >
+            <Database className="w-4 h-4" />
+            {vehicles.length === 0 ? 'Load Mock Data' : 'Clear Data'}
+          </button>
           <button 
             onClick={handleAISummary}
             className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium flex items-center gap-2 border border-purple-200"

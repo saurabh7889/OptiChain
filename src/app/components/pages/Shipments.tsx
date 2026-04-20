@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Package, MapPin, Clock, TruckIcon, CheckCircle, AlertCircle, Navigation } from 'lucide-react';
+import { Package, MapPin, Clock, TruckIcon, CheckCircle, AlertCircle, Navigation, Database } from 'lucide-react';
 import { StatusBadge } from '../shared/StatusBadge';
 import { ProgressBar } from '../shared/ProgressBar';
 import { useShipments } from '../../hooks/useShipments';
@@ -14,7 +14,7 @@ import {
 import { Trash2 } from 'lucide-react';
 
 export function Shipments() {
-  const { shipments, addShipment, deleteShipment } = useShipments();
+  const { shipments, addShipment, deleteShipment, loadMockData, clearData } = useShipments();
   const [filterType, setFilterType] = useState<string>('All Shipments');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -58,17 +58,26 @@ export function Shipments() {
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Shipments</h1>
           <p className="text-gray-600 mt-1">Track and manage all shipments in real-time</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-        >
-          + New Shipment
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={shipments.length === 0 ? loadMockData : clearData}
+            className="px-4 py-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors font-medium flex items-center gap-2 border border-purple-200"
+          >
+            <Database className="w-4 h-4" />
+            {shipments.length === 0 ? 'Load Mock Data' : 'Clear Data'}
+          </button>
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+          >
+            + New Shipment
+          </button>
+        </div>
       </div>
 
       {/* Filters */}

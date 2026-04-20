@@ -38,5 +38,18 @@ export function useVehicles() {
     setVehicles(prev => prev.filter(v => v.id !== id));
   };
 
-  return { vehicles, addVehicle, deleteVehicle };
+  const loadMockData = () => {
+    setVehicles([
+      { id: 'VH-101', model: 'Volvo VNL 860', driver: 'John Doe', status: 'Active', currentShipment: 'SH-8401', health: 98, mileage: '45,200 km', fuelLevel: 75, location: 'In Transit', lastMaintenance: '2 weeks ago', nextMaintenance: '2 months' },
+      { id: 'VH-102', model: 'Freightliner Cascadia', driver: 'Jane Smith', status: 'Idle', currentShipment: null, health: 100, mileage: '12,500 km', fuelLevel: 100, location: 'Miami Depot', lastMaintenance: '1 week ago', nextMaintenance: '3 months' },
+      { id: 'VH-103', model: 'Kenworth T680', driver: 'Mike Johnson', status: 'Active', currentShipment: 'SH-8403', health: 85, mileage: '125,000 km', fuelLevel: 45, location: 'Delayed Route', lastMaintenance: '4 months ago', nextMaintenance: 'Next Week' },
+      { id: 'VH-104', model: 'Peterbilt 579', driver: 'Sarah Williams', status: 'Maintenance', currentShipment: null, health: 60, mileage: '280,000 km', fuelLevel: 15, location: 'Denver Service Center', lastMaintenance: '6 months ago', nextMaintenance: 'In Progress' }
+    ]);
+  };
+
+  const clearData = () => {
+    setVehicles([]);
+  };
+
+  return { vehicles, addVehicle, deleteVehicle, loadMockData, clearData };
 }
